@@ -74,7 +74,68 @@ app.listen(PORT, () => {
         `A szerver fut: http://localhost:${PORT}`
     );
 });
- 
+
+
+app.post('/api/konyvek', (req, res) => {
+    const { mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto } = req.body;
+
+    db.query(
+        'INSERT INTO konyvek (mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto) VALUES (?, ?, ?, ?, ?)',
+        [mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.json({ uzenet: 'Könyv sikeresen beszúrva!', id: result.insertId });
+        }
+    );
+});
+
+
+app.post('/api/mufajok', (req, res) => {
+    const { nev } = req.body;
+
+    db.query(
+        'INSERT INTO mufajok (nev) VALUES (?)',
+        [nev],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.json({ uzenet: 'Műfaj sikeresen beszúrva!', id: result.insertId });
+        }
+    );
+});
+
+
+
+app.put('/api/konyvek/:id', (req, res) => {
+    const { mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto } = req.body;
+    const id = req.params.id;
+
+    db.query(
+        'UPDATE konyvek SET mufaj_id = ?, cim = ?, kiadasi_ev = ?, oldalszam = ?, kolcsonozheto = ? WHERE id = ?',
+        [mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto, id],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.json({ uzenet: 'Könyv sikeresen módosítva!' });
+        }
+    );
+});
+
+app.put('/api/konyvek/kolcsonozheto/:id', (req, res) => {
+    const { kolcsonozheto } = req.body;
+    const id = req.params.id;
+
+    db.query(
+        'UPDATE konyvek SET kolcsonozheto = ? WHERE id = ?',
+        [kolcsonozheto, id],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.json({ uzenet: 'Kölcsönözhetőség sikeresen módosítva!' });
+        }
+    );
+});
+
+
+
+
 
 
 
