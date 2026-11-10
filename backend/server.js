@@ -9,12 +9,11 @@ app.use(cors());
 app.use(express.json());
 
 const db = mysql.createConnection({
-    host: 'localhost',
+    host: '127.0.0.1',
     user: 'root',
     password: '',
-    database: 'konyvtar_db',
-    
-    
+    database: 'konyvtar_rl',
+    port: 3307
 });
 
 db.connect((err) => {
@@ -66,7 +65,100 @@ app.get('/api/hosszu-konyvek', (req, res) => {
         if (err) return res.status(500).send(err);
         res.json(result);
     });
+})
+
+
+
+
+ 
+ 
+
+app.post('/api/konyvek', (req, res) => {
+    const{mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto} = req.body;
+    db.query(
+        "INSERT INTO konyvek (mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto) VALUES (?,?,?,?,?)",
+        [mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto ],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.send('Konyv sikeresen beszurva! ID: ' + result.insertId);
+        }
+    );
 });
+
+app.post('/api/mufajok', (req, res) => {
+    const { nev } = req.body;
+
+    db.query(
+        'INSERT INTO mufajok (nev) VALUES (?)',
+        [nev],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+
+            res.json({ uzenet: 'Mufaj sikeresen beszurva!', id: result.insertId });
+        }
+    );
+});
+
+app.put('/api/konyvek/:id', (req, res) => {
+    const { mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto } = req.body;
+    const id = req.params.id;
+ 
+    db.query(
+        'UPDATE konyvek SET mufaj_id = ?, cim = ?, kiadasi_ev = ?, oldalszam = ?, kolcsonozheto = ? WHERE id = ?',
+        [mufaj_id, cim, kiadasi_ev, oldalszam, kolcsonozheto, id],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+            res.json({ uzenet: 'Könyv sikeresen módosítva!' });
+        }
+    );
+});
+app.put('/api/mufajok/:id', (req, res) => {
+    const { nev } = req.body;
+    const id = req.params.id;
+ 
+    db.query(
+        'UPDATE mufajok SET nev = ? WHERE id = ?',
+        [nev, id],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+ 
+            res.json({ uzenet: 'Műfaj sikeresen módosítva!' });
+        }
+    );
+});
+ 
+
+app.delete('/api/konyvek/:id', (req, res) => {
+    const id = req.params.id;
+ 
+    db.query(
+        'DELETE FROM konyvek WHERE id = ?',
+        [id],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+ 
+            res.json({ uzenet: 'Könyv sikeresen törölve!' });
+        }
+    );
+});
+ 
+ 
+
+app.delete('/api/mufajok/:id', (req, res) => {
+    const id = req.params.id;
+ 
+    db.query(
+        'DELETE FROM mufajok WHERE id = ?',
+        [id],
+        (err, result) => {
+            if (err) return res.status(500).send(err);
+ 
+            res.json({ uzenet: 'Műfaj sikeresen törölve!' });
+        }
+    );
+});
+ 
+
 
 
 app.listen(PORT, () => {
